@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\UpdateInfoRequest;
+use App\Http\Requests\UpdatePasswordRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -12,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(RegisterRequest $request)
+    public function register(RegisterRequest $request): Response
     {
         $user = User::create(
             $request->only('first_name', 'last_name', 'email') + [
@@ -27,7 +29,7 @@ class AuthController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    public function login(Request $request)
+    public function login(Request $request): Response
     {
         if (!Auth::attempt($request->only('email', 'password'))) {
             return response([
@@ -48,7 +50,7 @@ class AuthController extends Controller
         ));
     }
 
-    public function user(Request $request)
+    public function user(Request $request): Response
     {
         return response([
             'status' => true,
@@ -56,7 +58,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout()
+    public function logout(): Response
     {
         $cookie = Cookie::forget('jwt');
 
@@ -64,5 +66,31 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'Logout success!'
         ])->withCookie($cookie);
+    }
+
+    public function updateInfo(UpdateInfoRequest $request): Response
+    {
+        $user = $request->user();
+
+        $user->update($request->only('first_name', 'last_name', 'email'));
+
+        return response([
+            'status' => true,
+            'user' => $user,
+        ], Response::HTTP_ACCEPTED);
+    }
+
+    public function updatePassword(UpdatePasswordRequest $request): Response
+    {
+        $user = $request->user();
+
+        $user->update([
+            'password' => Hash::make($request->input('password'))
+        ]);
+
+        return response([
+            'status' => true,
+            'user' => $user,
+        ], Response::HTTP_ACCEPTED);
     }
 }
