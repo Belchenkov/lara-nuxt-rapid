@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AmbassadorController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 // Admin
@@ -16,6 +17,8 @@ Route::prefix('admin')->group(function () {
         Route::put('users/password', [AuthController::class, 'updatePassword']);
 
         Route::get('ambassadors', [AmbassadorController::class, 'index']);
+
+        Route::apiResource('products', ProductController::class);
     });
 });
 
