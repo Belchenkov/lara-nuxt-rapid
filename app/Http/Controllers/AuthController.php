@@ -35,7 +35,7 @@ class AuthController extends Controller
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        $jwt = auth()->user()?->createToken('token')->plainTextToken;
+        $jwt = auth()->user()?->createToken('token', ['admin'])->plainTextToken;
 
         return response([
             'status' => true,
