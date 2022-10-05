@@ -15,10 +15,21 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'email',
+        'is_admin',
         'password',
     ];
 
     protected $hidden = [
         'password',
     ];
+
+    public function scopeAmbassadors($query)
+    {
+        return $query->where('is_admin', 0);
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->where('is_admin', 1);
+    }
 }
