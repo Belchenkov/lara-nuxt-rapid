@@ -34,13 +34,24 @@ class AuthController extends Controller
             ], Response::HTTP_UNAUTHORIZED);
         }
 
+        $jwt = auth()->user()?->createToken('token')->plainTextToken;
+
         return response([
             'status' => true,
-            'user' => auth()->user()
+            'token' => $jwt,
+            'user' => auth()->user(),
         ])->withCookie(cookie(
             'jwt',
-            auth()->user()?->createToken('token')->plainTextToken,
+            $jwt,
             60 * 24
         ));
+    }
+
+    public function user(Request $request)
+    {
+        return response([
+            'status' => true,
+            'user' => $request->user(),
+        ]);
     }
 }
