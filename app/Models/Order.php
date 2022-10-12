@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
@@ -23,4 +24,19 @@ class Order extends Model
         'complete',
         'user_id',
     ];
+
+    public function getNameAttribute(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    public function getAdminRevenueAttribute(): string
+    {
+        return $this->orderItems->sum(fn(OrderItem $item) => $item->admin_revenue);
+    }
+
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }

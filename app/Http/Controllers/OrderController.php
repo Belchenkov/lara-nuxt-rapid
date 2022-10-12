@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 
 class OrderController extends Controller
@@ -10,7 +11,7 @@ class OrderController extends Controller
     {
         return response([
             'status' => true,
-            'orders' => Order::paginate(10),
+            'orders' => OrderResource::collection(Order::with('orderItems')->paginate(10)),
         ]);
     }
 }
