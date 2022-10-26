@@ -84,4 +84,14 @@ class ProductController extends Controller
             'message' => 'Product deleted',
         ], Response::HTTP_NO_CONTENT);
     }
+
+    public function frontend()
+    {
+        return Product::all();
+    }
+
+    public function backend()
+    {
+        return Product::paginate();
+    }
 }
