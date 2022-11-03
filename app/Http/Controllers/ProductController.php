@@ -100,10 +100,17 @@ class ProductController extends Controller
         return $products;
     }
 
-    public function backend(): LengthAwarePaginator
+    public function backend(Request $request): LengthAwarePaginator
     {
-        return Cache::remember('products_backend', 30 * 60, function () {
-            return Product::paginate();
-        });
+        $search = $request->input('search');
+        $products = Product::query();
+        $cache_key = 'products_backend:';
+
+        if ($search) {
+            $products = Product::whereLike('title', $search)->whereLike('description', $search);
+            $cache_key .= $search;
+        }
+
+        return Cache::remember($cache_key, 30 * 60, fn () =>  $products->paginate());
     }
 }
