@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -85,13 +87,23 @@ class ProductController extends Controller
         ], Response::HTTP_NO_CONTENT);
     }
 
-    public function frontend()
+    public function frontend(): Collection
     {
-        return Product::all();
+        if ($products = Cache::get('products_frontend')) {
+            return $products;
+        }
+
+        $products = Product::all();
+
+        Cache::set('products_frontend', $products, 30 * 60);
+
+        return $products;
     }
 
-    public function backend()
+    public function backend(): LengthAwarePaginator
     {
-        return Product::paginate();
+        return Cache::remember('products_backend', 30 * 60, function () {
+            return Product::paginate();
+        });
     }
 }
