@@ -103,12 +103,19 @@ class ProductController extends Controller
     public function backend(Request $request): LengthAwarePaginator
     {
         $search = $request->input('search');
+        $sort = $request->input('sort');
+
         $products = Product::query();
-        $cache_key = 'products_backend:';
+        $cache_key = 'products_backend';
 
         if ($search) {
-            $products = Product::whereLike('title', $search)->whereLike('description', $search);
-            $cache_key .= $search;
+            $products = $products->whereLike('title', $search)->whereLike('description', $search);
+            $cache_key .= ':' . $search;
+        }
+
+        if ($sort) {
+            $products = $products->orderBy('price', $sort);
+            $cache_key .= ':' . $sort;
         }
 
         return Cache::remember($cache_key, 30 * 60, fn () =>  $products->paginate());
