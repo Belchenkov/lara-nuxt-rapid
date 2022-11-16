@@ -40,9 +40,10 @@ Route::prefix('ambassador')->group(function () {
     Route::get('products/frontend', [ProductController::class, 'frontend']);
     Route::get('products/backend', [ProductController::class, 'backend']);
 
-    Route::middleware(['auth:sanctum', 'scope.ambassador'])->group(function () {
+    //Route::middleware(['auth:sanctum', 'scope.ambassador'])->group(function () {
         Route::get('stats', [StatsController::class, 'index']);
-    });
+        Route::get('rankings', [StatsController::class, 'rankings']);
+    //});
 });
 
 // Checkout

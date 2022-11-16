@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Link;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class StatsController extends Controller
@@ -26,5 +27,19 @@ class StatsController extends Controller
         return response()->json([
             'links' => $links
         ]);
+    }
+
+    public function rankings()
+    {
+        return User::ambassadors()
+            ->get()
+            ->map(fn (User $user) => [
+                    'name' => $user->name,
+                    'revenue' => $user->revenue,
+            ])
+            ->sortByDesc('revenue')
+            ->values();
+
+
     }
 }
