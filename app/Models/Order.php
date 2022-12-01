@@ -39,4 +39,9 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function getAmbassadorRevenueAttribute()
+    {
+        return $this->orderItems->sum(fn(OrderItem $item) => $item->ambassador_revenue);
+    }
 }

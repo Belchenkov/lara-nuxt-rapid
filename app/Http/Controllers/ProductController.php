@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -83,5 +85,39 @@ class ProductController extends Controller
             'status' => true,
             'message' => 'Product deleted',
         ], Response::HTTP_NO_CONTENT);
+    }
+
+    public function frontend(): Collection
+    {
+        if ($products = Cache::get('products_frontend')) {
+            return $products;
+        }
+
+        $products = Product::all();
+
+        Cache::set('products_frontend', $products, 30 * 60);
+
+        return $products;
+    }
+
+    public function backend(Request $request): LengthAwarePaginator
+    {
+        $search = $request->input('search');
+        $sort = $request->input('sort');
+
+        $products = Product::query();
+        $cache_key = 'products_backend';
+
+        if ($search) {
+            $products = $products->whereLike('title', $search)->whereLike('description', $search);
+            $cache_key .= ':' . $search;
+        }
+
+        if ($sort) {
+            $products = $products->orderBy('price', $sort);
+            $cache_key .= ':' . $sort;
+        }
+
+        return Cache::remember($cache_key, 30 * 60, fn () =>  $products->paginate());
     }
 }

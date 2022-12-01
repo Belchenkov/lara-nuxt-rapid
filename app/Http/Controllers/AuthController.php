@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\UpdateInfoRequest;
 use App\Http\Requests\UpdatePasswordRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -19,7 +20,7 @@ class AuthController extends Controller
         $user = User::create(
             $request->only('first_name', 'last_name', 'email') + [
                 'password' => Hash::make($request->input('password')),
-                'is_admin' => true
+                'is_admin' => $request->path() === 'api/admin/register'
             ]
         );
 
@@ -37,7 +38,16 @@ class AuthController extends Controller
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        $jwt = auth()->user()?->createToken('token', ['admin'])->plainTextToken;
+        $admin_login = $request->path() === 'api/admin/login';
+
+        if ($admin_login && !auth()->user()->is_admin) {
+            return response([
+                'error' => 'Access Denied!',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $scope = $admin_login ? 'admin' : 'ambassador';
+        $jwt = auth()->user()?->createToken('token', [$scope])->plainTextToken;
 
         return response([
             'status' => true,
@@ -54,7 +64,7 @@ class AuthController extends Controller
     {
         return response([
             'status' => true,
-            'user' => $request->user(),
+            'user' => new UserResource($request->user()),
         ]);
     }
 
